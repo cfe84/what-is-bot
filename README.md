@@ -1,17 +1,17 @@
 # Todo
 
-- [ ] Create new Bot using bot extension
-- [ ] Update Teams App Id in [[package.json]]
+- [x] Create new Bot using bot extension
+- [x] Update Teams App Id in [[package.json]]
 - Update [[.env]]
 ```
 BotId=
 BotPassword=
 ```
-  - [ ] Update botId
-  - [ ] Update botPassword
+  - [x] Update botId
+  - [x] Update botPassword
 - Update [[manifest.json]]
-  - [ ] Name
-  - [ ] App Id
+  - [x] Name
+  - [x] App Id
   - [ ] valid domains
   - [ ] bot id
 

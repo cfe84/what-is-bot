@@ -20,6 +20,7 @@ export class BotActivityHandler extends TeamsActivityHandler {
     }
 
     private async handleMessagesAsync(context: TurnContext, nextAsync: () => Promise<void>) {
+        console.log(context)
         TurnContext.removeRecipientMention(context.activity);
         switch ((context.activity.text || context.activity.value["text"]).trim().toLowerCase()) {
             case ACTIONNAME_HELP:
