@@ -1,0 +1,26 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Gives you definitions. Go with @whatis <SOMETHING>.",
+      "wrap": true,
+      "id": "message"
+    },
+    {
+      "type": "ActionSet",
+      "separator": true,
+      "actions": [
+        {
+          "type": "Action.Submit",
+          "title": "New definition",
+          "data": {
+            "text": "new definition"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -36,34 +36,19 @@
                     "scopes": [
                         "personal"
                     ],
-                    "commands": [
-                        {
-                            "title": "Hello",
-                            "description": "Sends a hello message and @mention the sender"
-                        }
-                    ]
+                    "commands": []
                 },
                 {
                     "scopes": [
                         "team"
                     ],
-                    "commands": [
-                        {
-                            "title": "Hello",
-                            "description": "Sends a hello message and @mention the sender"
-                        }
-                    ]
+                    "commands": []
                 },
                 {
                     "scopes": [
                         "groupchat"
                     ],
-                    "commands": [
-                        {
-                            "title": "Hello",
-                            "description": "Sends a hello message and @mention the sender"
-                        }
-                    ]
+                    "commands": []
                 }
             ],
             "supportsFiles": false,
