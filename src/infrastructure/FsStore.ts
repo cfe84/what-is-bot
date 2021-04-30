@@ -1,5 +1,6 @@
 import * as fs from "fs"
 import * as parse from "csv-parse/lib/sync"
+import * as csv from "csv/lib/sync"
 import { Definition, IDefinitionStore } from "../domain";
 
 enum FileTypeEnum {
@@ -62,7 +63,8 @@ export class FsStore implements IDefinitionStore {
       content = JSON.stringify(definitions)
     }
     if (fileType === FileTypeEnum.CSV) {
-      content = this.toCsv(definitions)
+      // content = this.toCsv(definitions)
+      content = csv.stringify(definitions, { header: true })
     }
     fs.writeFileSync(fileName, content)
   }

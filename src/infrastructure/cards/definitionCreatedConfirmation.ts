@@ -8,7 +8,7 @@ export function definitionCreatedConfirmation(definition: Definition) {
     "body": [
       {
         "type": "TextBlock",
-        "text": `Created definition ${definition.fullName}`,
+        "text": `Created definition for "${definition.fullName}"`,
         "wrap": true
       },
       {

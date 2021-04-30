@@ -5,22 +5,22 @@
     "id": "5ddf4954-8aa1-4365-a900-4c1878d70ed6",
     "packageName": "com.microsoft.bot.whatis",
     "developer": {
-        "name": "Teams App, Inc.",
-        "websiteUrl": "https://localhost:3000",
-        "privacyUrl": "https://localhost:3000/privacy",
-        "termsOfUseUrl": "https://localhost:3000/termsofuse"
+        "name": "Charles Feval",
+        "websiteUrl": "https://whatis-bot.feval.ca/",
+        "privacyUrl": "https://whatis-bot.feval.ca/privacy",
+        "termsOfUseUrl": "https://whatis-bot.feval.ca/termsofuse"
     },
     "icons": {
         "color": "color.png",
         "outline": "outline.png"
     },
     "name": {
-        "short": "What Is",
+        "short": "WhatIs",
         "full": "What Is"
     },
     "description": {
-        "short": "Gives definitions.",
-        "full": "Get definitions for acronyms and jargon specific to your team."
+        "short": "Gives corporate definitions.",
+        "full": "Get and share definitions for acronyms and jargon specific to your team."
     },
     "accentColor": "#FFFFFF",
     "bots": [
@@ -31,26 +31,7 @@
                 "groupchat",
                 "team"
             ],
-            "commandLists": [
-                {
-                    "scopes": [
-                        "personal"
-                    ],
-                    "commands": []
-                },
-                {
-                    "scopes": [
-                        "team"
-                    ],
-                    "commands": []
-                },
-                {
-                    "scopes": [
-                        "groupchat"
-                    ],
-                    "commands": []
-                }
-            ],
+            "commandLists": [],
             "supportsFiles": false,
             "isNotificationOnly": false
         }
@@ -61,6 +42,7 @@
     ],
     "validDomains": [
         "localhost:3000",
+        "whatis-bot.feval.ca",
         "*.ngrok.io"
     ]
 }

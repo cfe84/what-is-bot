@@ -18,3 +18,25 @@ spec:
       containers:
       - name: {{ .Values.appName }}
         image: {{ .Values.dockerRepo }}{{ .Values.appName }}:{{ .Values.imageVersion }}
+        env:
+        - name: FilePath
+          value: /mnt/storage/definitions.csv
+        - name: BotId
+          value: {{ .Values.botId }}
+        - name: BotPassword
+          value: {{ .Values.botPassword }}
+        volumeMounts:
+        - mountPath: "/mnt/storage"
+          name: sharedfolder
+      volumes:
+      - name: sharedfolder
+        azureFile:
+# read -p "Storage account name > " STORAGE_ACCOUNT_NAME && \
+# read -p " Storage account key > " STORAGE_ACCOUNT_KEY && \
+# SCREENR_NAMESPACE=what-is && \
+# kubectl -n $SCREENR_NAMESPACE create secret generic azure-sec \
+#   --from-literal=azurestorageaccountname=$STORAGE_ACCOUNT_NAME \
+#   --from-literal=azurestorageaccountkey=$STORAGE_ACCOUNT_KEY
+          secretName: azure-sec
+          shareName: whatis
+          readOnly: false

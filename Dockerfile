@@ -10,11 +10,8 @@ WORKDIR /app
 COPY --from=nodebuild /app/dist/ ./
 COPY package*.json ./
 RUN npm install --only=prod
-# TODO: change port if necessary
 EXPOSE 8000
-# TODO: add ENV if necessary
 ENV port=8000
 ENV PORT=8000
-ENV FilePath=/app/definitions.json
 COPY definitions.json /app/
 ENTRYPOINT node /app/application/index.js
