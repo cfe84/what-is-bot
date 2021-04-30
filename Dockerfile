@@ -15,5 +15,6 @@ EXPOSE 8000
 # TODO: add ENV if necessary
 ENV port=8000
 ENV PORT=8000
-COPY definitions.json ./
+ENV FilePath=/app/definitions.json
+COPY definitions.json /app/
 ENTRYPOINT node /app/application/index.js

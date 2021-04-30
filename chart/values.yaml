@@ -1,0 +1,5 @@
+ns: what-is
+dockerRepo: cfe84/
+appName: what-is
+hostName: whatis-bot.feval.ca
+imageVersion: latest

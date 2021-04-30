@@ -1,8 +1,9 @@
 [
   {
     "id": "1",
-    "initialism": "SMBA",
-    "fullName": "Skype Messaging Bot API",
-    "definition": "Talks with bots"
+    "initialism": "AKS",
+    "fullName": "Azure Kubernetes Service",
+    "definition": "Service on Azure that does Kubernetes",
+    "url": "https://azure.com"
   }
 ]

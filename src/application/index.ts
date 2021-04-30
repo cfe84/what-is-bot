@@ -45,6 +45,11 @@ server.listen(port, () =>
     logger.log(`Listening at http://localhost:${port}`)
 );
 
+server.get("/", (req, res) => {
+    res.send("I'm here")
+    res.end()
+})
+
 // Listen for incoming requests.
 server.post('/api/messages', (req, res) => {
     adapter.processActivity(req, res, async (context) => {
