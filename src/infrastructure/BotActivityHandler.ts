@@ -3,11 +3,12 @@ import { ActivityFactory, ContactRelationUpdateActionTypes, InvokeResponse, Team
 import { MessageFactory, TeamsActivityHandler, CardFactory, TeamsInfo, Attachment } from 'botbuilder';
 import { IDefinitionStore, Definition, DefinitionSearcher, ILogger } from "../domain";
 import * as helpCard from "./cards/helpCard.json"
-import * as newDefinition from "./cards/newDefinition.json"
+import { editDefinitionCard } from "./cards/editDefinitionCard"
 import { definitionCreatedConfirmation } from "./cards/definitionCreatedConfirmation";
+import { noDefinitionFoundCard } from "./cards/noDefinitionFoundCard";
 
 export interface BotActivityHandlerDependencies {
-    thingStore: IDefinitionStore,
+    definitionStore: IDefinitionStore,
     logger: ILogger
 }
 
@@ -25,9 +26,9 @@ export class BotActivityHandler extends TeamsActivityHandler {
         this.onMessage(async (context, next) => await this.handleMessagesAsync(context, next));
     }
 
-    private async handleMessagesAsync(context: TurnContext, nextAsync: () => Promise<void>) {
+    public async handleMessagesAsync(context: TurnContext, nextAsync: () => Promise<void>) {
         TurnContext.removeRecipientMention(context.activity);
-        if (!context.activity.text && !context.activity.value && !context.activity.value["text"]) {
+        if (!context.activity.text && (context.activity.value || !context.activity.value["text"])) {
             this.deps.logger.debug(context)
             await this.helpActivityAsync(context)
             return
@@ -58,7 +59,16 @@ export class BotActivityHandler extends TeamsActivityHandler {
     }
 
     private async showNewDefinitionFormAsync(context: TurnContext) {
-        await this.showCard(newDefinition, context)
+        const fullName = context.activity.value ? context.activity.value["fullName"] || "" : ""
+        const definition: Definition = {
+            definition: "",
+            fullName,
+            id: "",
+            initialism: "",
+            url: ""
+        }
+        const card = editDefinitionCard(undefined)
+        await this.showCard(card, context)
     }
 
     private async createDefinitionAsync(context: TurnContext) {
@@ -75,21 +85,26 @@ export class BotActivityHandler extends TeamsActivityHandler {
             url,
             initialism
         }
-        await this.deps.thingStore.saveDefinitionAsync(def)
+        await this.deps.definitionStore.saveDefinitionAsync(def)
 
         const card = CardFactory.adaptiveCard(definitionCreatedConfirmation(def));
         await context.sendActivity({ attachments: [card] });
     }
 
     private async searchAsync(context: TurnContext): Promise<void> {
-        const definitions = await this.deps.thingStore.getDefinitionsAsync()
+        const definitions = await this.deps.definitionStore.getDefinitionsAsync()
         const search = new DefinitionSearcher(definitions)
         const matching = search.searchDefinition(context.activity.text)
-        const assembleMessage = (definition: Definition) =>
-            `- **${definition.fullName}**` +
-            (definition.initialism ? ` (${definition.initialism})` : "") +
-            `: ${definition.definition}.` +
-            (definition.url ? ` [Learn more](${definition.url}).` : "")
-        await context.sendActivity(`Here is what I found:\n` + matching.map((match) => assembleMessage(match)).join("\n"))
+        if (!matching || matching.length === 0) {
+            const card = CardFactory.adaptiveCard(noDefinitionFoundCard(context.activity.text))
+            await context.sendActivity({ attachments: [card] })
+        } else {
+            const assembleMessage = (definition: Definition) =>
+                `- **${definition.fullName}**` +
+                (definition.initialism ? ` (${definition.initialism})` : "") +
+                `: ${definition.definition}.` +
+                (definition.url ? ` [Learn more](${definition.url}).` : "")
+            await context.sendActivity(`Here is what I found:\n` + matching.map((match) => assembleMessage(match)).join("\n"))
+        }
     }
 }

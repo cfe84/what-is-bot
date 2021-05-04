@@ -1,19 +1,13 @@
 # Todo
 
-- [x] Create new Bot using bot extension
-- [x] Update Teams App Id in [[package.json]]
-- Update [[.env]]
-```
-BotId=
-BotPassword=
-```
-  - [x] Update botId
-  - [x] Update botPassword
-- Update [[manifest.json]]
-  - [x] Name
-  - [x] App Id
-  - [ ] valid domains
-  - [ ] bot id
+Simple Features
+- [ ] If no definition found, ask for one.
+- [ ] Edit definitions
+- [ ] List existing definitions
+- [ ] Privacy policy and terms and conditions
+
+Larger scope
+- [ ] Support multi-tenant
 
 # Run
 

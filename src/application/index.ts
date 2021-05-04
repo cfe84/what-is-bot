@@ -9,7 +9,7 @@ require('dotenv').config();
 // See https://aka.ms/about-bot-adapter to learn more about adapters.
 const adapter = new BotFrameworkAdapter({
     appId: process.env.BotId,
-    appPassword: process.env.BotPassword
+    appPassword: process.env.BotPassword,
 });
 
 const logger = new ConsoleLogger()
@@ -36,7 +36,7 @@ adapter.onTurnError = async (context, error) => {
 const store = new FsStore(process.env.FilePath || "")
 
 // Create bot handlers
-const botActivityHandler = new BotActivityHandler({ thingStore: store, logger });
+const botActivityHandler = new BotActivityHandler({ definitionStore: store, logger });
 
 // Create HTTP server.
 const server = express();
