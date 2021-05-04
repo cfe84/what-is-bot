@@ -17,7 +17,7 @@ export function noDefinitionFoundCard(term: string) {
             "type": "Action.Submit",
             "title": "Create a definition for " + term,
             "data": {
-              "text": `new definition`,
+              "text": "new definition",
               "fullName": term
             }
           }

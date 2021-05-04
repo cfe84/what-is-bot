@@ -28,8 +28,8 @@ export class BotActivityHandler extends TeamsActivityHandler {
 
     public async handleMessagesAsync(context: TurnContext, nextAsync: () => Promise<void>) {
         TurnContext.removeRecipientMention(context.activity);
-        if (!context.activity.text && (context.activity.value || !context.activity.value["text"])) {
-            this.deps.logger.debug(context)
+        if (!context.activity.text && (!context.activity.value || !context.activity.value["text"])) {
+            this.deps.logger.debug(JSON.stringify(context, null, 2))
             await this.helpActivityAsync(context)
             return
         }
