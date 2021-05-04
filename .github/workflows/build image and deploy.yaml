@@ -35,4 +35,4 @@ jobs:
       - name: Deploy to kubernetes
       # TODO: Add environment variables using --set variable=${{ secrets.SMTP_HOST }}
         run: |
-          helm template ./chart --set containerTag=${{ github.sha }} --set botId=${{ secrets.BOT_ID }} --set botPassword=${{ secrets.BOT_PASSWORD }} | kubectl apply -f -
+          helm template ./chart --set imageVersion=${{ github.sha }} --set botId=${{ secrets.BOT_ID }} --set botPassword=${{ secrets.BOT_PASSWORD }} | kubectl apply -f -
