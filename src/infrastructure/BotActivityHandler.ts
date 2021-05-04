@@ -59,7 +59,7 @@ export class BotActivityHandler extends TeamsActivityHandler {
     }
 
     private async showNewDefinitionFormAsync(context: TurnContext) {
-        const fullName = context.activity.value ? context.activity.value["fullName"] || "" : ""
+        const fullName = context.activity.value ? (context.activity.value["fullName"] || "") : ""
         const definition: Definition = {
             definition: "",
             fullName,

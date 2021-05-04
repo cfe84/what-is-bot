@@ -16,7 +16,7 @@ export function editDefinitionCard(definition?: Definition) {
                 "type": "Input.Text",
                 "id": "fullName",
                 "placeholder": "Full name",
-                value: definition?.fullName
+                "value": definition?.fullName
             },
             {
                 "type": "Input.Text",
