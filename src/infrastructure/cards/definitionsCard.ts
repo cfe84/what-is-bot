@@ -2,7 +2,36 @@ import { Definition } from "../../domain"
 
 export function definitionsCard(definitions: Definition[]) {
   const definitionsElements = definitions.map((definition: Definition) => {
-    return {
+    const learnMoreButton = definition.url ?
+      {
+        "type": "ActionSet",
+        "actions": [{
+          "type": "Action.OpenUrl",
+          "title": "Learn more",
+          "url": definition.url
+        }]
+      }
+      : undefined
+    const updateButton = {
+      "type": "ActionSet",
+      "actions": [{
+        "type": "Action.Submit",
+        "title": "Update",
+        "style": "positive",
+        "data": {
+          "text": "edit definition",
+          "id": definition.id
+        }
+      }]
+    }
+    const columnize = (actionSet: any) => ({
+      "type": "Column",
+      "width": "auto",
+      "items": [
+        actionSet
+      ]
+    })
+    const card = {
       "type": "ColumnSet",
       "separator": true,
       "columns": [
@@ -11,42 +40,21 @@ export function definitionsCard(definitions: Definition[]) {
           "width": "stretch",
           "items": [
             {
-              "type": "RichTextBlock",
-              "inlines": [
-                {
-                  "type": "TextRun",
-                  "text": `**${definition.fullName}**` +
-                    (definition.initialism ? ` (${definition.initialism})` : "") +
-                    `: ${definition.definition}.` +
-                    (definition.url ? ` [Learn more](${definition.url}).` : "")
-                }
-              ],
-              "height": "stretch"
-            }
+              "type": "TextBlock",
+              "text": `**${definition.fullName}**` +
+                (definition.initialism ? ` (${definition.initialism})` : "") +
+                `: ${definition.definition}.`
+            },
           ]
         },
-        {
-          "type": "Column",
-          "width": "auto",
-          "items": [
-            {
-              "type": "ActionSet",
-              "actions": [
-                {
-                  "type": "Action.Submit",
-                  "title": "Change",
-                  "style": "positive",
-                  "data": {
-                    "text": "edit definition",
-                    "id": definition.id
-                  }
-                }
-              ]
-            }
-          ]
-        }
+
       ]
     }
+    if (definition.url) {
+      card.columns.push(columnize(learnMoreButton))
+    }
+    card.columns.push(columnize(updateButton))
+    return card
   })
   return {
     "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
