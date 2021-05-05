@@ -43,7 +43,8 @@ export function definitionsCard(definitions: Definition[]) {
               "type": "TextBlock",
               "text": `**${definition.fullName}**` +
                 (definition.initialism ? ` (${definition.initialism})` : "") +
-                `: ${definition.definition}.`
+                `: ${definition.definition}.`,
+              wrap: true
             },
           ]
         },
