@@ -1,13 +1,10 @@
 # Todo
 
-Simple Features
-- [ ] If no definition found, ask for one.
-- [ ] Edit definitions
+- [x] If no definition found, ask for one.
+- [x] Edit definitions
 - [ ] List existing definitions
 - [ ] Privacy policy and terms and conditions
-
-Larger scope
-- [ ] Support multi-tenant
+- [ ] Support multi-tenant, filter based on tenantid
 
 # Run
 

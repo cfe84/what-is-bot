@@ -44,7 +44,8 @@ export function editDefinitionCard(definition?: Definition) {
                         "type": "Action.Submit",
                         "title": isCreate ? "Create" : "Update",
                         "data": {
-                            "text": `${isCreate ? "create" : "update"} definition`
+                            "text": `${isCreate ? "create" : "update"} definition`,
+                            "id": definition?.id
                         }
                     }
                 ]

@@ -80,7 +80,12 @@ export class FsStore implements IDefinitionStore {
     return Promise.resolve(this.definitions)
   }
   async saveDefinitionAsync(definition: Definition): Promise<void> {
-    this.definitions.push(definition)
+    const idx = this.definitions.findIndex(def => def.id === definition.id)
+    if (idx >= 0) {
+      this.definitions.splice(idx, 1, definition)
+    } else {
+      this.definitions.push(definition)
+    }
     this.saveFile(this.fileType, this.file, this.definitions)
   }
 

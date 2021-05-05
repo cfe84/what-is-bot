@@ -1,6 +1,6 @@
 import { Definition } from "../../domain";
 
-export function definitionCreatedConfirmation(definition: Definition) {
+export function definitionCreatedConfirmation(definition: Definition, update: boolean = false) {
   return {
     "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
     "type": "AdaptiveCard",
@@ -8,7 +8,7 @@ export function definitionCreatedConfirmation(definition: Definition) {
     "body": [
       {
         "type": "TextBlock",
-        "text": `Created definition for "${definition.fullName}"`,
+        "text": `${update ? "Updated" : "Created"} definition for "${definition.fullName}"`,
         "wrap": true
       },
       {

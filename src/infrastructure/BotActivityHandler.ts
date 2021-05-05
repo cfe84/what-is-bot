@@ -6,6 +6,7 @@ import * as helpCard from "./cards/helpCard.json"
 import { editDefinitionCard } from "./cards/editDefinitionCard"
 import { definitionCreatedConfirmation } from "./cards/definitionCreatedConfirmation";
 import { noDefinitionFoundCard } from "./cards/noDefinitionFoundCard";
+import { definitionsCard } from "./cards/definitionsCard";
 
 export interface BotActivityHandlerDependencies {
     definitionStore: IDefinitionStore,
@@ -16,9 +17,12 @@ const ARGUMENTNAME_FULL_NAME = "fullName"
 const ARGUMENTNAME_DEFINITION = "definition"
 const ARGUMENTNAME_INITIALISM = "initialism"
 const ARGUMENTNAME_URL = "url"
+const ARGUMENTNAME_ID = "id"
 const ACTIONNAME_HELP = "help"
 const ACTIONNAME_NEW_DEFINITION = "new definition"
 const ACTIONNAME_CREATE_DEFINITION = "create definition"
+const ACTIONNAME_EDIT_DEFINITION = "edit definition"
+const ACTIONNAME_UPDATE_DEFINITION = "update definition"
 
 export class BotActivityHandler extends TeamsActivityHandler {
     constructor(private deps: BotActivityHandlerDependencies) {
@@ -35,14 +39,18 @@ export class BotActivityHandler extends TeamsActivityHandler {
         }
         switch ((context.activity.text || context.activity.value["text"]).trim().toLowerCase()) {
             case ACTIONNAME_HELP:
-                await this.helpActivityAsync(context);
-                break;
+                await this.helpActivityAsync(context)
+                break
             case ACTIONNAME_NEW_DEFINITION:
-                await this.showNewDefinitionFormAsync(context);
-                break;
+                await this.showNewDefinitionFormAsync(context)
+                break
             case ACTIONNAME_CREATE_DEFINITION:
-                await this.createDefinitionAsync(context);
-                break;
+            case ACTIONNAME_UPDATE_DEFINITION:
+                await this.saveDefinitionAsync(context)
+                break
+            case ACTIONNAME_EDIT_DEFINITION:
+                await this.showEditDefinitionFormAsync(context)
+                break
             default:
                 await this.searchAsync(context);
         }
@@ -67,16 +75,17 @@ export class BotActivityHandler extends TeamsActivityHandler {
             initialism: "",
             url: ""
         }
-        const card = editDefinitionCard(undefined)
+        const card = editDefinitionCard(definition)
         await this.showCard(card, context)
     }
 
-    private async createDefinitionAsync(context: TurnContext) {
+    private async saveDefinitionAsync(context: TurnContext) {
         const fullName = context.activity.value[ARGUMENTNAME_FULL_NAME]
         const definition = context.activity.value[ARGUMENTNAME_DEFINITION]
         const url = context.activity.value[ARGUMENTNAME_URL]
         const initialism = context.activity.value[ARGUMENTNAME_INITIALISM]
-        const id = uuidv4()
+        const isUpdate = !!context.activity.value[ARGUMENTNAME_ID]
+        const id = isUpdate ? context.activity.value[ARGUMENTNAME_ID] : uuidv4()
 
         const def: Definition = {
             id,
@@ -87,8 +96,15 @@ export class BotActivityHandler extends TeamsActivityHandler {
         }
         await this.deps.definitionStore.saveDefinitionAsync(def)
 
-        const card = CardFactory.adaptiveCard(definitionCreatedConfirmation(def));
+        const card = CardFactory.adaptiveCard(definitionCreatedConfirmation(def, isUpdate));
         await context.sendActivity({ attachments: [card] });
+    }
+
+    private async showEditDefinitionFormAsync(context: TurnContext) {
+        const id = context.activity.value ? (context.activity.value["id"] || "") : ""
+        const definition = await this.deps.definitionStore.getDefinitionAsync(id)
+        const card = editDefinitionCard(definition)
+        await this.showCard(card, context)
     }
 
     private async searchAsync(context: TurnContext): Promise<void> {
@@ -99,12 +115,8 @@ export class BotActivityHandler extends TeamsActivityHandler {
             const card = CardFactory.adaptiveCard(noDefinitionFoundCard(context.activity.text))
             await context.sendActivity({ attachments: [card] })
         } else {
-            const assembleMessage = (definition: Definition) =>
-                `- **${definition.fullName}**` +
-                (definition.initialism ? ` (${definition.initialism})` : "") +
-                `: ${definition.definition}.` +
-                (definition.url ? ` [Learn more](${definition.url}).` : "")
-            await context.sendActivity(`Here is what I found:\n` + matching.map((match) => assembleMessage(match)).join("\n"))
+            const card = CardFactory.adaptiveCard(definitionsCard(matching))
+            await context.sendActivity({ attachments: [card] })
         }
     }
 }
