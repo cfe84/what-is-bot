@@ -14,26 +14,26 @@ export function editDefinitionCard(definition?: Definition) {
             },
             {
                 "type": "Input.Text",
-                "id": "fullName",
-                "placeholder": "Full name",
-                "value": definition?.fullName
-            },
-            {
-                "type": "Input.Text",
                 "id": "initialism",
-                "placeholder": "Initialism",
+                "placeholder": "Initials or acronym (e.g. NASA)",
                 value: definition?.initialism
             },
             {
                 "type": "Input.Text",
+                "id": "fullName",
+                "placeholder": "Full text name (e.g. National Space Agency)",
+                "value": definition?.fullName
+            },
+            {
+                "type": "Input.Text",
                 "id": "definition",
-                "placeholder": "Definition",
+                "placeholder": "Definition (e.g. Agency looking for martians since 1753)",
                 value: definition?.definition
             },
             {
                 "type": "Input.Text",
                 "id": "url",
-                "placeholder": "URL",
+                "placeholder": "URL (e.g. https://nasa.gov)",
                 value: definition?.url
             },
             {
