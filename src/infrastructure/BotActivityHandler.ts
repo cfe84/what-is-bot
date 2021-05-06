@@ -23,6 +23,7 @@ const ACTIONNAME_NEW_DEFINITION = "new definition"
 const ACTIONNAME_CREATE_DEFINITION = "create definition"
 const ACTIONNAME_EDIT_DEFINITION = "edit definition"
 const ACTIONNAME_UPDATE_DEFINITION = "update definition"
+const ACTIONNAME_LIST_DEFINITIONS = "list definitions"
 
 export class BotActivityHandler extends TeamsActivityHandler {
     constructor(private deps: BotActivityHandlerDependencies) {
@@ -51,10 +52,18 @@ export class BotActivityHandler extends TeamsActivityHandler {
             case ACTIONNAME_EDIT_DEFINITION:
                 await this.showEditDefinitionFormAsync(context)
                 break
+            case ACTIONNAME_LIST_DEFINITIONS:
+                await this.listDefinitionsAsync(context)
+                break
             default:
                 await this.searchAsync(context);
         }
         await nextAsync();
+    }
+    async listDefinitionsAsync(context: TurnContext) {
+        const definitions = await this.deps.definitionStore.getDefinitionsAsync()
+        const card = definitionsCard(definitions.sort((a, b) => a.fullName.localeCompare(b.fullName)))
+        await this.showCard(card, context)
     }
 
     private async showCard(cardContent: any, context: TurnContext) {
