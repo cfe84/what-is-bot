@@ -1,8 +1,11 @@
 import * as  express from "express"
-import { BotFrameworkAdapter } from 'botbuilder'
+import * as path from "path"
+import * as fs from "fs"
+import { BotFrameworkAdapter, TurnContext } from 'botbuilder'
 import { BotActivityHandler } from '../infrastructure/BotActivityHandler'
 import { FsStore } from "../infrastructure/FsStore";
 import { ConsoleLogger } from "../infrastructure/ConsoleLogger";
+import { IDefinitionStore } from "../domain";
 
 require('dotenv').config();
 // Create adapter.
@@ -33,10 +36,8 @@ adapter.onTurnError = async (context, error) => {
     await context.sendActivity('Obviously the author of this bot doesn\'t know what they\'re doing.');
 };
 
-const store = new FsStore(process.env.FilePath || "")
 
 // Create bot handlers
-const botActivityHandler = new BotActivityHandler({ definitionStore: store, logger });
 
 // Create HTTP server.
 const server = express();
@@ -50,10 +51,25 @@ server.get("/", (req, res) => {
     res.end()
 })
 
+const handlers: { [tenantId: string]: BotActivityHandler } = {}
+
 // Listen for incoming requests.
 server.post('/api/messages', (req, res) => {
-    adapter.processActivity(req, res, async (context) => {
-        // Process bot activity
+
+    adapter.processActivity(req, res, async (context: TurnContext) => {
+        const tenantId = context.activity.conversation.tenantId
+        if (tenantId === undefined) {
+            throw Error("No tenant")
+        }
+        let botActivityHandler = handlers[tenantId]
+        if (!botActivityHandler) {
+            const file = path.join((process.env.FilePath || ""), `definitions-${tenantId}.csv`)
+            if (!fs.existsSync(file)) {
+                fs.writeFileSync(file, "")
+            }
+            const store = new FsStore(file)
+            botActivityHandler = new BotActivityHandler({ definitionStore: store, logger });
+        }
         await botActivityHandler.run(context);
     });
 });

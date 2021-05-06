@@ -2,9 +2,9 @@
 
 - [x] If no definition found, ask for one.
 - [x] Edit definitions
-- [ ] List existing definitions
+- [x] List existing definitions
 - [ ] Privacy policy and terms and conditions
-- [ ] Support multi-tenant, filter based on tenantid
+- [x] Support multi-tenant, filter based on tenantid
 
 # Run
 
