@@ -75,8 +75,16 @@ export class BotActivityHandler extends TeamsActivityHandler {
         await this.showCard(helpCard, context)
     }
 
+    private cleanTerm(term: string): string {
+        const forbiddenChars = /[^0-9a-z ]/ig
+        term = term.replace(forbiddenChars, "")
+        return term
+    }
+
     private async showNewDefinitionFormAsync(context: TurnContext) {
-        const fullName = context.activity.value ? (context.activity.value["fullName"] || "") : ""
+        const fullName = context.activity.value
+            ? this.cleanTerm(context.activity.value["fullName"] || "")
+            : ""
         const definition: Definition = {
             definition: "",
             fullName,
