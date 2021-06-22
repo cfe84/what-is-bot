@@ -32,6 +32,9 @@ describe("Definition search", () => {
   it("finds partial full name", () => {
     const res = searcher.searchDefinition("definition")
     should(res).length(2)
+    const res2 = searcher.searchDefinition("other")
+    should(res2).length(1)
+    should(res2[0].id).eql("2")
   })
 
   it("finds nothing", () => {
@@ -51,6 +54,20 @@ describe("Definition search", () => {
     should(res[0].id).eql("1")
   })
 
+  it("finds with punctuation", () => {
+    const res = searcher.searchDefinition("other?")
+    should(res).length(1)
+    should(res[0].id).eql("2")
+  })
+
+  it("finds with word salad", () => {
+    const res = searcher.searchDefinition("What is other?")
+    const res2 = searcher.searchDefinition("what's other?")
+    should(res).length(1)
+    should(res2).length(1)
+    should(res[0].id).eql("2")
+    should(res2[0].id).eql("2")
+  })
 })
 
 

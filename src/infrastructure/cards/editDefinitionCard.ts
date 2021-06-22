@@ -1,5 +1,32 @@
 import { Definition } from "../../domain";
 
+export function editDefinitionPlaceholder(term: string, userId: string, userName: string, requestId: string) {
+    return {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "originator": "c9b4352b-a76b-43b9-88ff-80edddaa243b",
+        "version": "1.4",
+        "refresh": {
+            "action": {
+                "type": "Action.Execute",
+                "title": "Submit",
+                "verb": "refreshCard",
+                "value": {
+                    requestId
+                }
+            },
+            "userIds": [userId]
+        },
+        "body": [
+            {
+                "type": "TextBlock",
+                "text": `Someone is editing a definition for ${term}`,
+                "wrap": true
+            }
+        ]
+    }
+}
+
 export function editDefinitionCard(definition?: Definition) {
     const isCreate = !definition?.id
     return {

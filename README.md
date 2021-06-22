@@ -1,3 +1,5 @@
+Provides definitions for initialisms, acronyms, and weird words that people dangle around in the company. Deploy the bot in Teams and @whatis it to understand what they're talking about!
+
 # Todo
 
 - [x] If no definition found, ask for one.
@@ -5,6 +7,8 @@
 - [x] List existing definitions
 - [ ] Privacy policy and terms and conditions
 - [x] Support multi-tenant, filter based on tenantid
+- [ ] Delete definition
+- [ ] Support multiple dictionaries by tenant
 
 # Run
 
