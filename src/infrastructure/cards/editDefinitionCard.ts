@@ -1,30 +1,42 @@
 import { Definition } from "../../domain";
 
-export function editDefinitionPlaceholder(term: string, userId: string, userName: string, requestId: string) {
+export type NextAction = "new definition" | "update definition"
+
+
+export function editDefinitionPlaceholderWithRefresh(next: NextAction, definition: Definition, initiatorId: string, userIds: string[], userName: string) {
+    const refresh = {
+        "action": {
+            "type": "Action.Execute",
+            "title": "Submit",
+            "verb": next,
+            "data": {
+                initiatorId,
+                initiatorName: userName,
+                definition
+            }
+        },
+        userIds
+    }
+    const card: any = editDefinitionPlaceholder(userName, definition)
+    card["refresh"] = refresh
+    return card
+}
+
+export function editDefinitionPlaceholder(userName: string, definition: Definition): any {
     return {
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
         "originator": "c9b4352b-a76b-43b9-88ff-80edddaa243b",
         "version": "1.4",
-        "refresh": {
-            "action": {
-                "type": "Action.Execute",
-                "title": "Submit",
-                "verb": "refreshCard",
-                "value": {
-                    requestId
-                }
-            },
-            "userIds": [userId]
-        },
+
         "body": [
             {
                 "type": "TextBlock",
-                "text": `Someone is editing a definition for ${term}`,
+                "text": `${userName} is setting a definition for ${definition.initialism}`,
                 "wrap": true
             }
         ]
-    }
+    };
 }
 
 export function editDefinitionCard(definition?: Definition) {
@@ -40,27 +52,47 @@ export function editDefinitionCard(definition?: Definition) {
                 "wrap": true
             },
             {
+                "type": "TextBlock",
+                "text": `**Initial / acronym**`,
+                "wrap": true
+            },
+            {
                 "type": "Input.Text",
                 "id": "initialism",
-                "placeholder": "Initials or acronym (e.g. NASA)",
+                "placeholder": "e.g. NASA",
                 value: definition?.initialism
+            },
+            {
+                "type": "TextBlock",
+                "text": `**Full text name**`,
+                "wrap": true
             },
             {
                 "type": "Input.Text",
                 "id": "fullName",
-                "placeholder": "Full text name (e.g. National Space Agency)",
+                "placeholder": "e.g. National Space Agency",
                 "value": definition?.fullName
+            },
+            {
+                "type": "TextBlock",
+                "text": `**Definition**`,
+                "wrap": true
             },
             {
                 "type": "Input.Text",
                 "id": "definition",
-                "placeholder": "Definition (e.g. Agency looking for martians since 1753)",
+                "placeholder": "e.g. Agency looking for martians since 1753",
                 value: definition?.definition
+            },
+            {
+                "type": "TextBlock",
+                "text": `**URL**`,
+                "wrap": true
             },
             {
                 "type": "Input.Text",
                 "id": "url",
-                "placeholder": "URL (e.g. https://nasa.gov)",
+                "placeholder": "e.g. https://nasa.gov",
                 value: definition?.url
             },
             {

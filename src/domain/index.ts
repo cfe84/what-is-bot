@@ -7,6 +7,5 @@ export {
   Definition,
   IDefinitionStore,
   DefinitionSearcher,
-
   ILogger
 }

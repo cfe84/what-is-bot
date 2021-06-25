@@ -1,0 +1,48 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.8/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.8",
+    "version": "1.0.0",
+    "id": "be602966-7d0c-46cd-8420-0a2ddf9b2f2c",
+    "packageName": "com.microsoft.bot.whatis",
+    "developer": {
+        "name": "Charles Feval",
+        "websiteUrl": "https://rlay.feval.ca/",
+        "privacyUrl": "https://rlay.feval.ca/privacy",
+        "termsOfUseUrl": "https://rlay.feval.ca/termsofuse"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "WhatIs.Local",
+        "full": "What Is - Local"
+    },
+    "description": {
+        "short": "Gives corporate definitions.",
+        "full": "Get and share definitions for acronyms and jargon specific to your team."
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [
+        {
+            "botId": "be602966-7d0c-46cd-8420-0a2ddf9b2f2c",
+            "scopes": [
+                "personal",
+                "groupchat",
+                "team"
+            ],
+            "commandLists": [],
+            "supportsFiles": false,
+            "isNotificationOnly": false
+        }
+    ],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "localhost:3000",
+        "rlay.feval.ca",
+        "*.ngrok.io"
+    ]
+}

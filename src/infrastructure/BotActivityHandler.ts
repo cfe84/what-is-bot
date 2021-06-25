@@ -1,23 +1,17 @@
-import { v4 as uuidv4 } from "uuid"
-import { ActivityFactory, ContactRelationUpdateActionTypes, InvokeResponse, TeamInfo, TeamsChannelAccount, TurnContext } from "botbuilder-core";
-import { MessageFactory, TeamsActivityHandler, CardFactory, TeamsInfo, Attachment } from 'botbuilder';
-import { IDefinitionStore, Definition, DefinitionSearcher, ILogger } from "../domain";
+import { TurnContext } from "botbuilder-core";
+import { TeamsActivityHandler, CardFactory, InvokeResponse } from 'botbuilder';
+import { IDefinitionStore, DefinitionSearcher, ILogger } from "../domain";
 import * as helpCard from "./cards/helpCard.json"
-import { editDefinitionCard } from "./cards/editDefinitionCard"
-import { definitionCreatedConfirmation } from "./cards/definitionCreatedConfirmation";
 import { noDefinitionFoundCard } from "./cards/noDefinitionFoundCard";
 import { definitionsCard } from "./cards/definitionsCard";
+import { EditionHandler } from "./EditionHandler";
 
 export interface BotActivityHandlerDependencies {
     definitionStore: IDefinitionStore,
     logger: ILogger
 }
 
-const ARGUMENTNAME_FULL_NAME = "fullName"
-const ARGUMENTNAME_DEFINITION = "definition"
-const ARGUMENTNAME_INITIALISM = "initialism"
-const ARGUMENTNAME_URL = "url"
-const ARGUMENTNAME_ID = "id"
+
 const ACTIONNAME_HELP = "help"
 const ACTIONNAME_NEW_DEFINITION = "new definition"
 const ACTIONNAME_CREATE_DEFINITION = "create definition"
@@ -25,10 +19,49 @@ const ACTIONNAME_EDIT_DEFINITION = "edit definition"
 const ACTIONNAME_UPDATE_DEFINITION = "update definition"
 const ACTIONNAME_LIST_DEFINITIONS = "list definitions"
 
+const INVOKE_NEW_DEFINITION = "new definition"
+
 export class BotActivityHandler extends TeamsActivityHandler {
+
+    private editionHandler: EditionHandler
+
     constructor(private deps: BotActivityHandlerDependencies) {
         super();
         this.onMessage(async (context, next) => await this.handleMessagesAsync(context, next));
+        this.editionHandler = new EditionHandler(deps)
+        // Handle invoke by bot action
+        this.onInvokeActivity = (context) => this.handleInvokeAsync(context);
+    }
+
+    /**
+     * Handles invoke types not currently supported by the teamsActivityHandler,
+     * such as the refresh
+     * @param context
+     * @returns
+     */
+    async handleInvokeAsync(context: TurnContext): Promise<InvokeResponse> {
+        if (context.activity.name === "adaptiveCard/action") {
+            return await this.handleAdaptiveCardAction(context);
+        }
+
+        try {
+            return super.onInvokeActivity(context);
+        } catch (error) {
+            this.deps.logger.error(error);
+            return {
+                status: 500,
+            };
+        }
+    }
+
+    async handleAdaptiveCardAction(context: TurnContext): Promise<InvokeResponse> {
+        this.deps.logger.debug("Refresh action received")
+        if (context.activity?.value?.action?.verb === INVOKE_NEW_DEFINITION) {
+            return await this.editionHandler.handleEditDefinitionAsync(context)
+        }
+        throw Error(
+            `Verb not implemented: ${context.activity.value?.action?.verb}`
+        );
     }
 
     public async handleMessagesAsync(context: TurnContext, nextAsync: () => Promise<void>) {
@@ -43,14 +76,14 @@ export class BotActivityHandler extends TeamsActivityHandler {
                 await this.helpActivityAsync(context)
                 break
             case ACTIONNAME_NEW_DEFINITION:
-                await this.showNewDefinitionFormAsync(context)
+                await this.editionHandler.showNewDefinitionFormAsync(context)
                 break
             case ACTIONNAME_CREATE_DEFINITION:
             case ACTIONNAME_UPDATE_DEFINITION:
-                await this.saveDefinitionAsync(context)
+                await this.editionHandler.saveDefinitionAsync(context)
                 break
             case ACTIONNAME_EDIT_DEFINITION:
-                await this.showEditDefinitionFormAsync(context)
+                await this.editionHandler.showEditDefinitionFormAsync(context)
                 break
             case ACTIONNAME_LIST_DEFINITIONS:
                 await this.listDefinitionsAsync(context)
@@ -73,55 +106,6 @@ export class BotActivityHandler extends TeamsActivityHandler {
 
     private async helpActivityAsync(context: TurnContext) {
         await this.showCard(helpCard, context)
-    }
-
-    private cleanTerm(term: string): string {
-        const forbiddenChars = /[^0-9a-z ]/ig
-        term = term.replace(forbiddenChars, "")
-        return term
-    }
-
-    private async showNewDefinitionFormAsync(context: TurnContext) {
-        const fullName = context.activity.value
-            ? this.cleanTerm(context.activity.value["fullName"] || "")
-            : ""
-        const definition: Definition = {
-            definition: "",
-            fullName,
-            id: "",
-            initialism: "",
-            url: ""
-        }
-        const card = editDefinitionCard(definition)
-        await this.showCard(card, context)
-    }
-
-    private async saveDefinitionAsync(context: TurnContext) {
-        const fullName = context.activity.value[ARGUMENTNAME_FULL_NAME]
-        const definition = context.activity.value[ARGUMENTNAME_DEFINITION]
-        const url = context.activity.value[ARGUMENTNAME_URL]
-        const initialism = context.activity.value[ARGUMENTNAME_INITIALISM]
-        const isUpdate = !!context.activity.value[ARGUMENTNAME_ID]
-        const id = isUpdate ? context.activity.value[ARGUMENTNAME_ID] : uuidv4()
-
-        const def: Definition = {
-            id,
-            fullName,
-            definition,
-            url,
-            initialism
-        }
-        await this.deps.definitionStore.saveDefinitionAsync(def)
-
-        const card = CardFactory.adaptiveCard(definitionCreatedConfirmation(def, isUpdate));
-        await context.sendActivity({ attachments: [card] });
-    }
-
-    private async showEditDefinitionFormAsync(context: TurnContext) {
-        const id = context.activity.value ? (context.activity.value["id"] || "") : ""
-        const definition = await this.deps.definitionStore.getDefinitionAsync(id)
-        const card = editDefinitionCard(definition)
-        await this.showCard(card, context)
     }
 
     private async searchAsync(context: TurnContext): Promise<void> {
