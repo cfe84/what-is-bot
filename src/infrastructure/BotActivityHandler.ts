@@ -95,7 +95,7 @@ export class BotActivityHandler extends TeamsActivityHandler {
     }
     async listDefinitionsAsync(context: TurnContext) {
         const definitions = await this.deps.definitionStore.getDefinitionsAsync()
-        const card = definitionsCard(definitions.sort((a, b) => a.fullName.localeCompare(b.fullName)))
+        const card = definitionsCard("everything", definitions.sort((a, b) => a.fullName.localeCompare(b.fullName)))
         await this.showCard(card, context)
     }
 
@@ -111,12 +111,13 @@ export class BotActivityHandler extends TeamsActivityHandler {
     private async searchAsync(context: TurnContext): Promise<void> {
         const definitions = await this.deps.definitionStore.getDefinitionsAsync()
         const search = new DefinitionSearcher(definitions)
-        const matching = search.searchDefinition(context.activity.text)
+        const term = context.activity.text
+        const matching = search.searchDefinition(term)
         if (!matching || matching.length === 0) {
             const card = CardFactory.adaptiveCard(noDefinitionFoundCard(context.activity.text))
             await context.sendActivity({ attachments: [card] })
         } else {
-            const card = CardFactory.adaptiveCard(definitionsCard(matching))
+            const card = CardFactory.adaptiveCard(definitionsCard(term, matching))
             await context.sendActivity({ attachments: [card] })
         }
     }

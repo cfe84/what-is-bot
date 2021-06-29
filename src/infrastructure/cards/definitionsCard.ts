@@ -1,6 +1,6 @@
 import { Definition } from "../../domain"
 
-export function definitionsCard(definitions: Definition[]) {
+export function definitionsCard(term: string, definitions: Definition[]) {
   const definitionsElements = definitions.map((definition: Definition) => {
     const learnMoreButton = definition.url ?
       {
@@ -64,10 +64,24 @@ export function definitionsCard(definitions: Definition[]) {
     "body": [
       {
         "type": "TextBlock",
-        "text": `Here is what I found:`,
+        "text": `Here is what I found for "${term}":`,
         "wrap": true
       },
-      ...definitionsElements
+      ...definitionsElements,
+      {
+        "type": "ActionSet",
+        "separator": true,
+        "actions": [
+          {
+            "type": "Action.Submit",
+            "title": "Add another definition for " + term,
+            "data": {
+              "text": "new definition",
+              "fullName": term
+            }
+          }
+        ]
+      }
     ],
 
   }

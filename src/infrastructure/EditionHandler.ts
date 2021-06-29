@@ -32,7 +32,7 @@ export class EditionHandler {
     }
     await this.deps.definitionStore.saveDefinitionAsync(def)
 
-    const definitionCard = CardFactory.adaptiveCard(definitionsCard([def]))
+    const definitionCard = CardFactory.adaptiveCard(definitionsCard(fullName, [def]))
     const message = MessageFactory.attachment(definitionCard)
     message.id = context.activity.replyToId
     await context.updateActivity(message);
