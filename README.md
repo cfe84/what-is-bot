@@ -2,6 +2,7 @@ Provides definitions for initialisms, acronyms, and weird words that people dang
 
 # Todo
 
+Basic:
 - [x] If no definition found, ask for one.
 - [x] Edit definitions
 - [x] List existing definitions
@@ -9,6 +10,10 @@ Provides definitions for initialisms, acronyms, and weird words that people dang
 - [x] Support multi-tenant, filter based on tenantid
 - [ ] Delete definition
 - [ ] Support multiple dictionaries by tenant
+- [ ] Support SSO
+
+Advanced:
+- [ ] Receive all messages and respond with @mention
 
 # Run
 

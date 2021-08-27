@@ -68,6 +68,12 @@ describe("Definition search", () => {
     should(res[0].id).eql("2")
     should(res2[0].id).eql("2")
   })
+
+  it("finds orders partial results", () => {
+    const res = searcher.searchDefinition("second definition")
+    should(res[0].id).eql("2")
+    should(res[1].id).eql("1")
+  })
 })
 
 
