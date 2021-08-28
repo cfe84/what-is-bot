@@ -1,9 +1,9 @@
 import { CardFactory, ComponentRegistration, InvokeResponse, MessageFactory, TeamsInfo, TurnContext } from "botbuilder"
 import { v4 as uuidv4 } from "uuid"
-import { Definition } from "../domain"
-import { BotActivityHandlerDependencies } from "./BotActivityHandler"
-import { definitionsCard } from "./cards/definitionsCard"
-import { editDefinitionCard, editDefinitionPlaceholder, editDefinitionPlaceholderWithRefresh } from "./cards/editDefinitionCard"
+import { Definition } from "../../domain"
+import { BotActivityHandlerDependencies } from "../BotActivityHandler"
+import { definitionsCard } from "../cards/definitionsCard"
+import { editDefinitionCard, editDefinitionPlaceholder, editDefinitionPlaceholderWithRefresh } from "../cards/editDefinitionCard"
 
 const ARGUMENTNAME_FULL_NAME = "fullName"
 const ARGUMENTNAME_DEFINITION = "definition"

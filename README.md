@@ -14,6 +14,7 @@ Basic:
 
 Advanced:
 - [ ] Receive all messages and respond with @mention
+- [ ] Make appPackage templatized
 
 # Run
 

@@ -1,13 +1,13 @@
 import { TurnContext } from "botbuilder-core";
 import { TeamsActivityHandler, CardFactory, InvokeResponse } from 'botbuilder';
-import { IDefinitionStore, DefinitionSearcher, ILogger } from "../domain";
+import { IDictionary, DefinitionSearcher, ILogger, Definition } from "../domain";
 import * as helpCard from "./cards/helpCard.json"
 import { noDefinitionFoundCard } from "./cards/noDefinitionFoundCard";
 import { definitionsCard } from "./cards/definitionsCard";
-import { EditionHandler } from "./EditionHandler";
+import { EditionHandler } from "./handlers/EditionHandler";
 
 export interface BotActivityHandlerDependencies {
-    definitionStore: IDefinitionStore,
+    definitionStore: IDictionary,
     logger: ILogger
 }
 
@@ -94,8 +94,10 @@ export class BotActivityHandler extends TeamsActivityHandler {
         await nextAsync();
     }
     async listDefinitionsAsync(context: TurnContext) {
+        this.deps.logger.debug(`Listing definitions`)
         const definitions = await this.deps.definitionStore.getDefinitionsAsync()
-        const card = definitionsCard("everything", definitions.sort((a, b) => a.fullName.localeCompare(b.fullName)))
+        const card = definitionsCard("everything",
+            definitions.sort((a: Definition, b: Definition) => a.fullName.localeCompare(b.fullName)))
         await this.showCard(card, context)
     }
 

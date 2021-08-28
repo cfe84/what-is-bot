@@ -1,92 +1,96 @@
-import * as fs from "fs"
-import * as parse from "csv-parse/lib/sync"
-import * as csv from "csv/lib/sync"
-import { Definition, IDefinitionStore } from "../domain";
+import path = require("path");
+import fs = require("fs");
+import { IDictionary } from "../domain";
+import { DictionaryMetadata } from "../domain/DictionaryMetadata";
+import { ITenantStore } from "../domain/ITenantStore";
+import { FsDictionaryStore } from "./FsDictionaryStore";
+import { Tenant } from "../domain/Tenant";
+import { IUserPreferenceStore } from "../domain/IUserPreferenceStore";
+import { UserPreferences } from "../domain/UserPreferences";
 
-enum FileTypeEnum {
-  CSV,
-  JSON,
-  Unknown
-}
-
-export class FsStore implements IDefinitionStore {
-  private definitions: Definition[]
-  private fileType: FileTypeEnum
-
-  constructor(private file: string) {
-    this.fileType = this.determineFileTypeFromName(file)
-    this.definitions = this.loadFile(this.fileType, file)
+export class FsStore implements ITenantStore, IUserPreferenceStore {
+  private dictionaries: Map<string, IDictionary> = new Map()
+  constructor(private path: string) {
   }
 
-  private determineFileTypeFromName(fileName: string): FileTypeEnum {
-    if (fileName.endsWith("json")) {
-      return FileTypeEnum.JSON
+  async getDictionaryAsync(dictionaryId: string): Promise<IDictionary> {
+    const file = path.join(this.path, `definitions-${dictionaryId}.csv`)
+    if (!this.dictionaries.has(file)) {
+      this.dictionaries.set(file, new FsDictionaryStore(file))
     }
-    if (fileName.endsWith("csv")) {
-      return FileTypeEnum.CSV
-    }
-    return FileTypeEnum.Unknown
+    return this.dictionaries.get(file) as IDictionary
   }
 
-  private loadFile(fileType: FileTypeEnum, fileName: string): Definition[] {
-    const fileContent = fs.readFileSync(fileName).toString()
-    if (fileType === FileTypeEnum.JSON) {
-      return JSON.parse(fileContent)
-    }
-    if (fileType === FileTypeEnum.CSV) {
-      return parse(fileContent, {
-        columns: true,
-        skipEmptyLines: true
-      })
-    }
-    throw Error("Unsupported filetype. Only csv and json are supported: " + fileName)
+  async listDictionariesAsync(tenantId: string): Promise<DictionaryMetadata[]> {
+    const record = this.getTenantRecord(tenantId)
+    return Object.values(record.dictionaries)
   }
 
-  private toCsv(definitions: Definition[]) {
-    const escape = (str: string) => str.replace(/\"/g, '""')
-    const titles = `id,initialism,fullName,definition,url\n`
-    const defs = definitions.map(definition =>
-      [definition.id, definition.initialism, definition.fullName, definition.definition, definition.url]
-        .map(str => str ? `"${escape(str)}"` : "")
-        .join(",")
-    )
-    const res = [titles, ...defs].join("\n")
-    return res
+  async updateOrCreateDictionaryAsync(tenantId: string, metadata: DictionaryMetadata): Promise<void> {
+    const record = this.getTenantRecord(tenantId)
+    record.dictionaries[metadata.id] = metadata
+    this.saveTenantRecord(record)
+  }
+  private saveTenantRecord(record: Tenant) {
+    const file = this.getTenantFileName(record.tenantId)
+    const content = JSON.stringify(record)
+    fs.writeFileSync(file, content)
   }
 
-  private saveFile(fileType: FileTypeEnum, fileName: string, definitions: Definition[]) {
-    if (fileType === FileTypeEnum.Unknown) {
-      throw Error("Unsupported filetype. Only csv and json are supported")
+  private getTenantRecord(tenantId: string): Tenant {
+    const file = this.getTenantFileName(tenantId)
+    if (!fs.existsSync(file)) {
+      const defaultDictionary: DictionaryMetadata = {
+        id: tenantId,
+        isDefault: true,
+        name: "Default"
+      }
+      const record: Tenant = {
+        tenantId,
+        dictionaries: {}
+      }
+      record.dictionaries[tenantId] = defaultDictionary
+      return record
     }
-    let content = ""
-    if (fileType === FileTypeEnum.JSON) {
-      content = JSON.stringify(definitions)
-    }
-    if (fileType === FileTypeEnum.CSV) {
-      // content = this.toCsv(definitions)
-      content = csv.stringify(definitions, { header: true })
-    }
-    fs.writeFileSync(fileName, content)
+    const record = JSON.parse(`${fs.readFileSync(tenantId)}`) as Tenant
+    return record
   }
 
-  getDefinitionAsync(id: string): Promise<Definition> {
-    const definition = this.definitions.find((def => def.id === id))
-    if (!definition) {
-      throw Error(`Not found: ${id}`)
-    }
-    return Promise.resolve(definition)
-  }
-  getDefinitionsAsync(): Promise<Definition[]> {
-    return Promise.resolve(this.definitions)
-  }
-  async saveDefinitionAsync(definition: Definition): Promise<void> {
-    const idx = this.definitions.findIndex(def => def.id === definition.id)
-    if (idx >= 0) {
-      this.definitions.splice(idx, 1, definition)
-    } else {
-      this.definitions.push(definition)
-    }
-    this.saveFile(this.fileType, this.file, this.definitions)
+  private getTenantFileName(tenantId: string): string {
+    return path.join(this.path, `tenant-${tenantId}.json`)
   }
 
+  async getDictionaryIdsAsync(userId: string): Promise<string[]> {
+    const userRecord = this.getUserRecord(userId)
+    return userRecord.dictionaries
+  }
+
+  async saveDictionaryIdsAsync(userId: string, ids: string[]): Promise<void> {
+    const userRecord = this.getUserRecord(userId)
+    userRecord.dictionaries = ids
+    this.saveUserRecord(userRecord)
+  }
+
+  private saveUserRecord(record: UserPreferences) {
+    const file = this.getUserFileName(record.userId)
+    const content = JSON.stringify(record)
+    fs.writeFileSync(file, content)
+  }
+
+  private getUserRecord(userId: string): UserPreferences {
+    const file = this.getUserFileName(userId)
+    if (!fs.existsSync(file)) {
+      const record: UserPreferences = {
+        userId,
+        dictionaries: []
+      }
+      return record
+    }
+    const record = JSON.parse(`${fs.readFileSync(userId)}`) as UserPreferences
+    return record
+  }
+
+  private getUserFileName(userId: string): string {
+    return path.join(this.path, `user-${userId}.json`)
+  }
 }

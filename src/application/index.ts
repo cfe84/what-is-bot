@@ -3,9 +3,10 @@ import * as path from "path"
 import * as fs from "fs"
 import { BotFrameworkAdapter, TurnContext } from 'botbuilder'
 import { BotActivityHandler } from '../infrastructure/BotActivityHandler'
-import { FsStore } from "../infrastructure/FsStore";
+import { FsDictionaryStore } from "../infrastructure/FsDictionaryStore";
 import { ConsoleLogger } from "../infrastructure/ConsoleLogger";
-import { IDefinitionStore } from "../domain";
+import { IDictionary } from "../domain";
+import { FsStore } from "../infrastructure/FsStore"
 
 require('dotenv').config();
 // Create adapter.
@@ -52,6 +53,7 @@ server.get("/", (req, res) => {
 })
 
 const handlers: { [tenantId: string]: BotActivityHandler } = {}
+const store = new FsStore(process.env.FilePath || "")
 
 // Listen for incoming requests.
 server.post('/api/messages', (req, res) => {
@@ -63,12 +65,8 @@ server.post('/api/messages', (req, res) => {
         }
         let botActivityHandler = handlers[tenantId]
         if (!botActivityHandler) {
-            const file = path.join((process.env.FilePath || ""), `definitions-${tenantId}.csv`)
-            if (!fs.existsSync(file)) {
-                fs.writeFileSync(file, "")
-            }
-            const store = new FsStore(file)
-            botActivityHandler = new BotActivityHandler({ definitionStore: store, logger });
+            const definitionStore = await store.getDictionaryAsync(tenantId)
+            botActivityHandler = new BotActivityHandler({ definitionStore, logger });
         }
         await botActivityHandler.run(context);
     });

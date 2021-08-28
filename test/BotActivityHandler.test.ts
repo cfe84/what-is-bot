@@ -1,7 +1,7 @@
 import * as td from "testdouble"
 import * as should from "should"
 
-import { MemoryStore } from "../src/infrastructure/MemoryStore"
+import { MemoryDictionaryStore, MemoryStore } from "../src/infrastructure/MemoryStore"
 import { BotActivityHandler, BotActivityHandlerDependencies } from "../src/infrastructure/BotActivityHandler"
 import { Attachment, TurnContext } from "botbuilder-core"
 
@@ -11,7 +11,7 @@ import { Activity } from "botbuilder"
 type StringObject = { [key: string]: any }
 
 const makeDepsAsync = async (): Promise<BotActivityHandlerDependencies> => {
-  const definitionStore = new MemoryStore()
+  const definitionStore = new MemoryDictionaryStore()
   await definitionStore.saveDefinitionAsync({
     definition: "DEFINITION",
     fullName: "FULL NAME",
@@ -92,73 +92,5 @@ describe("Bot activity handler", async () => {
     checkCardText("didn't")(activity)
     return true
   })
-
-  // context("Create definition", async () => {
-  //   // given
-  //   const deps = await makeDepsAsync()
-  //   const handler = new BotActivityHandler(deps)
-  //   const context = makeTurnContext("create definition", {
-  //     fullName: "THE_NEW_FULLNAME",
-  //     initialism: "THE_NEW_INITIALISM",
-  //     definition: "THE_NEW_DEFINITION",
-  //     url: "THE_NEW_URL"
-  //   })
-
-  //   // when
-  //   try {
-  //     await handler.run(context)
-  //   } catch (er) {
-  //     it("failed on invoke for create definition", () => { throw er })
-  //     return
-  //   }
-
-  //   it("Creates definition", function () {
-  //     td.verify(context.sendActivity(td.matchers.argThat((activity: Partial<Activity>): boolean => {
-  //       checkCardText("Created definition for")(activity)
-  //       checkCardText("THE_NEW_FULLNAME")(activity)
-  //       return true
-  //     })))
-  //   })
-
-  //   it("Finds definition in the list", async () => {
-  //     const definitions = await deps.definitionStore.getDefinitionsAsync()
-  //     should(definitions[1].fullName).eql("THE_NEW_FULLNAME")
-  //   })
-  // })
-
-  // context.skip("Update definition", async () => {
-  //   // given
-  //   const deps = await makeDepsAsync()
-  //   const handler = new BotActivityHandler(deps)
-  //   const context = makeTurnContext("update definition", {
-  //     fullName: "THE_NEW_FULLNAME",
-  //     initialism: "THE_NEW_INITIALISM",
-  //     definition: "THE_NEW_DEFINITION",
-  //     url: "THE_NEW_URL",
-  //     id: "ID"
-  //   })
-
-  //   // when
-  //   try {
-  //     await handler.run(context)
-  //   } catch (er) {
-  //     it("failed on invoke for update definition", () => { throw er })
-  //     return
-  //   }
-
-  //   it("Confirmed update", function () {
-  //     td.verify(context.sendActivity(td.matchers.argThat((activity: Partial<Activity>): boolean => {
-  //       checkCardText("Updated definition for")(activity)
-  //       checkCardText("THE_NEW_FULLNAME")(activity)
-  //       return true
-  //     })))
-  //   })
-
-  //   it("Finds definition in the list", async () => {
-  //     const definitions = await deps.definitionStore.getDefinitionsAsync()
-  //     should(definitions).length(1)
-  //     should(definitions[0].fullName).eql("THE_NEW_FULLNAME")
-  //   })
-  // })
 
 })
