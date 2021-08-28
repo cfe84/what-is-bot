@@ -20,7 +20,8 @@ export function definitionsCard(term: string, definitions: Definition[]) {
         "style": "positive",
         "data": {
           "text": "edit definition",
-          "id": definition.id
+          "id": definition.id,
+          "dictionaryId": definition.dictionaryId
         }
       }]
     }

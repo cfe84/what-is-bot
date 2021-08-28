@@ -13,7 +13,7 @@ export class FsDictionaryStore implements IDictionary {
   private definitions: Definition[]
   private fileType: FileTypeEnum
 
-  constructor(private file: string) {
+  constructor(private file: string, private dictionaryId: string) {
     this.fileType = this.determineFileTypeFromName(file)
     this.definitions = this.loadFile(this.fileType, file)
   }
@@ -72,13 +72,17 @@ export class FsDictionaryStore implements IDictionary {
   getDefinitionAsync(id: string): Promise<Definition> {
     const definition = this.definitions.find((def => def.id === id))
     if (!definition) {
-      throw Error(`Not found: ${id}`)
+      throw Error(`FsDictionaryStore.getDefinitionAsync: Definition not found: ${id} in dictionary ${this.dictionaryId}`)
     }
+    definition.dictionaryId = this.dictionaryId
     return Promise.resolve(definition)
   }
 
   getDefinitionsAsync(): Promise<Definition[]> {
-    return Promise.resolve(this.definitions)
+    return Promise.resolve(this.definitions.map(definition => {
+      definition.dictionaryId = this.dictionaryId
+      return definition
+    }))
   }
 
   async saveDefinitionAsync(definition: Definition): Promise<void> {

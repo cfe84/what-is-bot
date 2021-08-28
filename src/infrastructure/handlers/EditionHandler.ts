@@ -10,6 +10,7 @@ const ARGUMENTNAME_DEFINITION = "definition"
 const ARGUMENTNAME_INITIALISM = "initialism"
 const ARGUMENTNAME_URL = "url"
 const ARGUMENTNAME_ID = "id"
+const ARGUMENTNAME_DICTIONARYID = "dictionaryId"
 
 export class EditionHandler {
 
@@ -22,15 +23,19 @@ export class EditionHandler {
     const initialism = context.activity.value[ARGUMENTNAME_INITIALISM]
     const isUpdate = !!context.activity.value[ARGUMENTNAME_ID]
     const id = isUpdate ? context.activity.value[ARGUMENTNAME_ID] : uuidv4()
+    const dictionaryId = isUpdate ? context.activity.value[ARGUMENTNAME_DICTIONARYID] : context.activity.conversation.tenantId || "default"
+    const tenantId = context.activity.conversation.tenantId || "default"
 
     const def: Definition = {
       id,
       fullName,
       definition,
       url,
-      initialism
+      initialism,
+      dictionaryId
     }
-    await this.deps.definitionStore.saveDefinitionAsync(def)
+    const dictionary = await this.deps.tenantStore.getDictionaryAsync(dictionaryId)
+    await dictionary.saveDefinitionAsync(def)
 
     const definitionCard = CardFactory.adaptiveCard(definitionsCard(fullName, [def]))
     const message = MessageFactory.attachment(definitionCard)
@@ -43,12 +48,14 @@ export class EditionHandler {
     const initialism = context.activity.value
       ? this.cleanTerm(context.activity.value["fullName"] || "")
       : ""
+    const dictionaryId = context.activity.conversation.tenantId || "default"
     const definition: Definition = {
       definition: "",
       fullName: "",
       id: "",
       initialism,
-      url: ""
+      url: "",
+      dictionaryId
     }
 
     await this.sendDefinitionRefreshCardAsync(context, definition)
@@ -86,7 +93,10 @@ export class EditionHandler {
 
   async showEditDefinitionFormAsync(context: TurnContext) {
     const id = context.activity.value ? (context.activity.value["id"] || "") : ""
-    const definition = await this.deps.definitionStore.getDefinitionAsync(id)
+    const tenantId = context.activity.conversation.tenantId || "default"
+    const dictionaryId = context.activity.value ? (context.activity.value["dictionaryId"] || tenantId) : tenantId
+    const dictionary = await this.deps.tenantStore.getDictionaryAsync(dictionaryId)
+    const definition = await dictionary.getDefinitionAsync(id)
     await this.sendDefinitionRefreshCardAsync(context, definition)
   }
 

@@ -3,5 +3,6 @@ export interface Definition {
   initialism?: string
   url?: string
   fullName: string
-  definition: string
+  definition: string,
+  dictionaryId: string
 }

@@ -5,9 +5,12 @@ import * as helpCard from "./cards/helpCard.json"
 import { noDefinitionFoundCard } from "./cards/noDefinitionFoundCard";
 import { definitionsCard } from "./cards/definitionsCard";
 import { EditionHandler } from "./handlers/EditionHandler";
+import { ITenantStore } from "../domain/ITenantStore";
+import { IUserPreferenceStore } from "../domain/IUserPreferenceStore";
 
 export interface BotActivityHandlerDependencies {
-    definitionStore: IDictionary,
+    tenantStore: ITenantStore,
+    userPreferenceStore: IUserPreferenceStore
     logger: ILogger
 }
 
@@ -20,6 +23,10 @@ const ACTIONNAME_UPDATE_DEFINITION = "update definition"
 const ACTIONNAME_LIST_DEFINITIONS = "list definitions"
 
 const INVOKE_NEW_DEFINITION = "new definition"
+
+const flatten = <T>(arr: T[][]): T[] => arr.reduce((res, cur) => res.concat(cur));
+const tranformAndFlattenAsync = async <T, U>(array: U[], transform: (x: U) => Promise<T[]>) =>
+    flatten(await Promise.all(array.map(val => transform(val))))
 
 export class BotActivityHandler extends TeamsActivityHandler {
 
@@ -94,8 +101,12 @@ export class BotActivityHandler extends TeamsActivityHandler {
         await nextAsync();
     }
     async listDefinitionsAsync(context: TurnContext) {
-        this.deps.logger.debug(`Listing definitions`)
-        const definitions = await this.deps.definitionStore.getDefinitionsAsync()
+        const userId = this.getUserId(context)
+        const tenantId = this.getTenantId(context)
+        this.deps.logger.debug(`Listing definitions for user ${userId}`)
+        const dictionaries = await this.getUserDictionariesAsync(userId, tenantId)
+        this.deps.logger.debug(`Found ${dictionaries.length} dictionaries`)
+        const definitions = await tranformAndFlattenAsync(dictionaries, dic => dic.getDefinitionsAsync())
         const card = definitionsCard("everything",
             definitions.sort((a: Definition, b: Definition) => a.fullName.localeCompare(b.fullName)))
         await this.showCard(card, context)
@@ -110,8 +121,37 @@ export class BotActivityHandler extends TeamsActivityHandler {
         await this.showCard(helpCard, context)
     }
 
+    private getUserId(context: TurnContext): string {
+        const userId = context.activity.from.aadObjectId
+        if (!userId) {
+            throw Error(`User is not authenticated with AAD`)
+        }
+        return userId
+    }
+
+    private getTenantId(context: TurnContext): string {
+        const tenantId = context.activity.conversation.tenantId || "default"
+        if (!tenantId) {
+            throw Error(`User is not authenticated with AAD`)
+        }
+        return tenantId
+    }
+
+    private async getUserDictionariesAsync(userId: string, tenantId: string) {
+        const dictionaryIds = await this.deps.userPreferenceStore.getDictionaryIdsAsync(userId)
+        if (dictionaryIds.length === 0) {
+            this.deps.logger.debug(`User ${userId} doesn't have dictionaries. Defaulting to tenant`)
+            dictionaryIds.push(tenantId)
+        }
+        const dictionaries = await Promise.all(dictionaryIds.map(dictionaryId => this.deps.tenantStore.getDictionaryAsync(dictionaryId)))
+        return dictionaries
+    }
+
     private async searchAsync(context: TurnContext): Promise<void> {
-        const definitions = await this.deps.definitionStore.getDefinitionsAsync()
+        const userId = this.getUserId(context)
+        const tenantId = this.getTenantId(context)
+        const dictionaries = await this.getUserDictionariesAsync(userId, tenantId)
+        const definitions = await tranformAndFlattenAsync(dictionaries, dict => dict.getDefinitionsAsync())
         const search = new DefinitionSearcher(definitions)
         const term = context.activity.text
         const matching = search.searchDefinition(term)

@@ -4,6 +4,7 @@ export type NextAction = "new definition" | "update definition"
 
 
 export function editDefinitionPlaceholderWithRefresh(next: NextAction, definition: Definition, initiatorId: string, userIds: string[], userName: string) {
+    const now = Date.now()
     const refresh = {
         "action": {
             "type": "Action.Execute",
@@ -12,7 +13,8 @@ export function editDefinitionPlaceholderWithRefresh(next: NextAction, definitio
             "data": {
                 initiatorId,
                 initiatorName: userName,
-                definition
+                definition,
+                initiatedAtTs: now
             }
         },
         userIds
@@ -28,7 +30,6 @@ export function editDefinitionPlaceholder(userName: string, definition: Definiti
         "type": "AdaptiveCard",
         "originator": "c9b4352b-a76b-43b9-88ff-80edddaa243b",
         "version": "1.4",
-
         "body": [
             {
                 "type": "TextBlock",
@@ -104,7 +105,8 @@ export function editDefinitionCard(definition?: Definition) {
                         "title": isCreate ? "Create" : "Update",
                         "data": {
                             "text": `${isCreate ? "create" : "update"} definition`,
-                            "id": definition?.id
+                            "id": definition?.id,
+                            "dictionaryId": definition?.dictionaryId
                         }
                     }
                 ]

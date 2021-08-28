@@ -9,13 +9,15 @@ describe("Definition search", () => {
       id: "1",
       definition: "This is the first definition",
       fullName: "Full name for the first definition",
-      initialism: "abcd"
+      initialism: "abcd",
+      dictionaryId: "1234"
     },
     {
       id: "2",
       definition: "That is the second definition",
       fullName: "the other",
-      initialism: "edfgh"
+      initialism: "edfgh",
+      dictionaryId: "1234"
     }
   ]
 

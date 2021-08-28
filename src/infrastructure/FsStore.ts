@@ -16,7 +16,7 @@ export class FsStore implements ITenantStore, IUserPreferenceStore {
   async getDictionaryAsync(dictionaryId: string): Promise<IDictionary> {
     const file = path.join(this.path, `definitions-${dictionaryId}.csv`)
     if (!this.dictionaries.has(file)) {
-      this.dictionaries.set(file, new FsDictionaryStore(file))
+      this.dictionaries.set(file, new FsDictionaryStore(file, dictionaryId))
     }
     return this.dictionaries.get(file) as IDictionary
   }
@@ -52,7 +52,7 @@ export class FsStore implements ITenantStore, IUserPreferenceStore {
       record.dictionaries[tenantId] = defaultDictionary
       return record
     }
-    const record = JSON.parse(`${fs.readFileSync(tenantId)}`) as Tenant
+    const record = JSON.parse(`${fs.readFileSync(file)}`) as Tenant
     return record
   }
 
@@ -86,7 +86,7 @@ export class FsStore implements ITenantStore, IUserPreferenceStore {
       }
       return record
     }
-    const record = JSON.parse(`${fs.readFileSync(userId)}`) as UserPreferences
+    const record = JSON.parse(`${fs.readFileSync(file)}`) as UserPreferences
     return record
   }
 

@@ -11,16 +11,21 @@ import { Activity } from "botbuilder"
 type StringObject = { [key: string]: any }
 
 const makeDepsAsync = async (): Promise<BotActivityHandlerDependencies> => {
-  const definitionStore = new MemoryDictionaryStore()
-  await definitionStore.saveDefinitionAsync({
+
+
+  const store = new MemoryStore()
+  const dictionary = await store.getDictionaryAsync("tenant-id")
+  await dictionary.saveDefinitionAsync({
     definition: "DEFINITION",
     fullName: "FULL NAME",
     id: "ID",
     initialism: "INITIALISM",
-    url: "URL"
+    url: "URL",
+    dictionaryId: "DICTIONARY_ID"
   })
   return {
-    definitionStore,
+    tenantStore: store,
+    userPreferenceStore: store,
     logger: td.object(["log", "warn", "error", "debug"])
   }
 }

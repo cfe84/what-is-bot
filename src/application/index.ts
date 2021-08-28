@@ -52,22 +52,12 @@ server.get("/", (req, res) => {
     res.end()
 })
 
-const handlers: { [tenantId: string]: BotActivityHandler } = {}
 const store = new FsStore(process.env.FilePath || "")
-
+const botActivityHandler = new BotActivityHandler({ tenantStore: store, userPreferenceStore: store, logger });
 // Listen for incoming requests.
 server.post('/api/messages', (req, res) => {
 
     adapter.processActivity(req, res, async (context: TurnContext) => {
-        const tenantId = context.activity.conversation.tenantId
-        if (tenantId === undefined) {
-            throw Error("No tenant")
-        }
-        let botActivityHandler = handlers[tenantId]
-        if (!botActivityHandler) {
-            const definitionStore = await store.getDictionaryAsync(tenantId)
-            botActivityHandler = new BotActivityHandler({ definitionStore, logger });
-        }
         await botActivityHandler.run(context);
     });
 });
