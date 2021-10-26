@@ -37,6 +37,9 @@ export class DefinitionSearcher {
   }
 
   private clean(str: string): string[] {
+    if (!str) {
+      return []
+    }
     const forbiddenChars = /[^0-9a-z ]/ig
     return str.replace(forbiddenChars, "")
       .split(" ")

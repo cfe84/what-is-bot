@@ -42,18 +42,6 @@ export class FsDictionaryStore implements IDictionary {
     throw Error("Unsupported filetype. Only csv and json are supported: " + fileName)
   }
 
-  private toCsv(definitions: Definition[]) {
-    const escape = (str: string) => str.replace(/\"/g, '""')
-    const titles = `id,initialism,fullName,definition,url\n`
-    const defs = definitions.map(definition =>
-      [definition.id, definition.initialism, definition.fullName, definition.definition, definition.url]
-        .map(str => str ? `"${escape(str)}"` : "")
-        .join(",")
-    )
-    const res = [titles, ...defs].join("\n")
-    return res
-  }
-
   private saveFile(fileType: FileTypeEnum, fileName: string, definitions: Definition[]) {
     if (fileType === FileTypeEnum.Unknown) {
       throw Error("Unsupported filetype. Only csv and json are supported")

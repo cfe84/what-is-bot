@@ -101,6 +101,9 @@ export class EditionHandler {
   }
 
   private cleanTerm(term: string): string {
+    if (!term) {
+      return term
+    }
     const forbiddenChars = /[^0-9a-z ]/ig
     term = term.replace(forbiddenChars, "")
     return term

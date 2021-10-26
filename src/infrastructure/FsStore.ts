@@ -14,7 +14,7 @@ export class FsStore implements ITenantStore, IUserPreferenceStore {
   }
 
   async getDictionaryAsync(dictionaryId: string): Promise<IDictionary> {
-    const file = path.join(this.path, `definitions-${dictionaryId}.csv`)
+    const file = path.join(this.path, `definitions-${dictionaryId}.json`)
     if (!this.dictionaries.has(file)) {
       this.dictionaries.set(file, new FsDictionaryStore(file, dictionaryId))
     }
